@@ -219,33 +219,36 @@ export class GameScene extends Phaser.Scene {
     const isBomb = Math.random() < bombChance;
 
     let item: FallingItem;
+    const textureKey = isBomb ? 'bomb' : '';
+
+    item = this.items.get(
+      Phaser.Math.Between(40, GAME_CONFIG.width - 40),
+      -50
+    ) as FallingItem;
+
+    if (!item) return;
+
     if (isBomb) {
-      item = this.items.get(
-        Phaser.Math.Between(40, GAME_CONFIG.width - 40),
-        -50,
-        'bomb'
-      ) as FallingItem;
+      item.setTexture('bomb');
       item.itemType = 'bomb';
+      item.packetConfig = undefined;
+      item.baseScore = undefined;
     } else {
       const packetType = this.selectRedPacketType();
-      item = this.items.get(
-        Phaser.Math.Between(40, GAME_CONFIG.width - 40),
-        -50,
-        `packet_${packetType.type}`
-      ) as FallingItem;
+      item.setTexture(`packet_${packetType.type}`);
       item.itemType = 'redpacket';
       item.packetConfig = packetType;
       item.baseScore = packetType.score;
     }
 
-    if (!item) return;
-
     item.setActive(true);
     item.setVisible(true);
+    item.setAngle(0);
     if (item.body) {
       item.body.reset(item.x, item.y);
+      item.body.enable = true;
     }
-    item.setScale(isBomb ? 0.9 : 1);
+    item.setScale(isBomb ? 1 : 1);
 
     const fallSpeed = Phaser.Math.Linear(
       GAME_CONFIG.initialFallSpeed,

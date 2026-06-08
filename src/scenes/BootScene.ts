@@ -13,15 +13,15 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.createParticleTexture();
     this.createPlayerTexture();
     this.createRedPacketTextures();
     this.createBombTexture();
     this.createHeartTexture();
-    this.createParticleTexture();
   }
 
   private createParticleTexture(): void {
-    const graphics = this.make.graphics();
+    const graphics = this.make.graphics({ x: 0, y: 0 });
     graphics.fillStyle(0xffffff);
     graphics.beginPath();
     graphics.arc(8, 8, 6, 0, Math.PI * 2);
@@ -31,12 +31,12 @@ export class BootScene extends Phaser.Scene {
   }
 
   private createPlayerTexture(): void {
-    const graphics = this.make.graphics();
     const w = 90;
     const h = 90;
     const cx = w / 2;
     const cy = h / 2;
 
+    const graphics = this.make.graphics({ x: 0, y: 0 });
     graphics.fillStyle(COLORS.player);
     graphics.lineStyle(4, COLORS.playerOutline, 1);
     graphics.beginPath();
@@ -51,8 +51,13 @@ export class BootScene extends Phaser.Scene {
     graphics.strokePath();
     graphics.fillStyle(COLORS.playerOutline);
     graphics.fillRect(cx - 15, cy - 35, 30, 10);
-    graphics.generateTexture('player', w, h);
+
+    const rt = this.make.renderTexture({ x: w / 2, y: h / 2, width: w, height: h });
+    rt.draw(graphics);
+    rt.saveTexture('player');
+
     graphics.destroy();
+    rt.destroy();
   }
 
   private createRedPacketTextures(): void {
@@ -63,27 +68,38 @@ export class BootScene extends Phaser.Scene {
       const cx = w / 2;
       const cy = h / 2;
 
-      const graphics = this.make.graphics();
+      const graphics = this.make.graphics({ x: 0, y: 0 });
       graphics.fillStyle(packet.color);
       graphics.lineStyle(3, 0xcc0000, 1);
       graphics.fillRoundedRect(cx - size / 2, cy - size * 0.65, size, size * 1.3, 6);
       graphics.strokeRoundedRect(cx - size / 2, cy - size * 0.65, size, size * 1.3, 6);
       graphics.fillStyle(0xffcc00);
       graphics.fillCircle(cx, cy - size * 0.2, size * 0.2);
-      graphics.generateTexture(`packet_${packet.type}`, w, h);
 
       const label = this.add.text(cx, cy + size * 0.1, packet.label, {
-        fontSize: `${size * 0.35}px`,
+        fontSize: `${size * 0.4}px`,
         fontFamily: 'Microsoft YaHei',
         color: '#ffffff',
+        stroke: '#000000',
+        strokeThickness: 2,
       }).setOrigin(0.5);
 
-      const rt = this.make.renderTexture({ x: cx, y: cy, width: w, height: h });
+      const scoreLabel = this.add.text(cx, cy + size * 0.45, `${packet.score}分`, {
+        fontSize: `${size * 0.25}px`,
+        fontFamily: 'Microsoft YaHei',
+        color: '#ffff00',
+        stroke: '#000000',
+        strokeThickness: 1,
+      }).setOrigin(0.5);
+
+      const rt = this.make.renderTexture({ x: w / 2, y: h / 2, width: w, height: h });
       rt.draw(graphics);
       rt.draw(label);
+      rt.draw(scoreLabel);
       rt.saveTexture(`packet_${packet.type}`);
 
       label.destroy();
+      scoreLabel.destroy();
       graphics.destroy();
       rt.destroy();
     }
@@ -96,7 +112,7 @@ export class BootScene extends Phaser.Scene {
     const cx = w / 2;
     const cy = h / 2 + 5;
 
-    const graphics = this.make.graphics();
+    const graphics = this.make.graphics({ x: 0, y: 0 });
     graphics.fillStyle(COLORS.bomb);
     graphics.beginPath();
     graphics.arc(cx, cy, bombSize / 2, 0, Math.PI * 2);
@@ -111,8 +127,19 @@ export class BootScene extends Phaser.Scene {
     graphics.beginPath();
     graphics.arc(cx - bombSize * 0.15, cy - bombSize * 0.15, bombSize * 0.12, 0, Math.PI * 2);
     graphics.fillPath();
-    graphics.generateTexture('bomb', w, h);
+
+    const dangerLabel = this.add.text(cx, cy, '💣', {
+      fontSize: `${bombSize * 0.6}px`,
+    }).setOrigin(0.5);
+
+    const rt = this.make.renderTexture({ x: w / 2, y: h / 2, width: w, height: h });
+    rt.draw(graphics);
+    rt.draw(dangerLabel);
+    rt.saveTexture('bomb');
+
+    dangerLabel.destroy();
     graphics.destroy();
+    rt.destroy();
   }
 
   private createHeartTexture(): void {
@@ -121,7 +148,7 @@ export class BootScene extends Phaser.Scene {
     const cx = w / 2;
     const cy = h / 2;
 
-    const graphics = this.make.graphics();
+    const graphics = this.make.graphics({ x: 0, y: 0 });
     graphics.fillStyle(0xff4444);
     graphics.beginPath();
     graphics.arc(cx - 6, cy - 4, 7, 0, Math.PI * 2);
