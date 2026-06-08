@@ -1,0 +1,8 @@
+version: '3.8'
+services:
+  red-packet-game:
+    build: .
+    ports:
+      - "8080:80"
+    container_name: red-packet-game
+    restart: unless-stopped
